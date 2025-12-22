@@ -10,8 +10,55 @@ import (
 )
 
 type Ip struct {
-	Nets      [][]byte
+	Supernets [][]byte
 	Hypernets [][]byte
+	SuperAba  map[string]bool
+	HyperAba  map[string]bool
+}
+
+func (i *Ip) GetSuperAba() {
+
+	superAbas := make(map[string]bool)
+
+	for _, s := range i.Supernets {
+		for i := 2; i < len(s); i++ {
+
+			if (s[i-2] == s[i]) && (s[i-1] != s[i-2]) {
+				superAbas[string(s[i-2:i+1])] = true
+			}
+
+		}
+	}
+	i.SuperAba = superAbas
+
+}
+
+func (i *Ip) GetHyperAba() {
+	hyperAbas := make(map[string]bool)
+
+	for _, s := range i.Hypernets {
+		for i := 2; i < len(s); i++ {
+
+			if (s[i-2] == s[i]) && (s[i-1] != s[i-2]) {
+				hyperAbas[string(s[i-2:i+1])] = true
+			}
+
+		}
+	}
+	i.HyperAba = hyperAbas
+}
+
+func (i Ip) SupportsSsl() bool {
+
+	for aba := range i.SuperAba {
+		bab := string([]byte{aba[1], aba[0], aba[1]})
+		if i.HyperAba[bab] {
+			return true
+		}
+	}
+
+	return false
+
 }
 
 func createIps(data []byte) []Ip {
@@ -20,13 +67,13 @@ func createIps(data []byte) []Ip {
 	var ips []Ip
 	for entry := range bytes.SplitSeq(data, []byte{10}) {
 
-		var nets [][]byte
+		var supernets [][]byte
 		var hypernets [][]byte
 		var curr []byte
 		for _, char := range entry {
 
 			if char == 91 {
-				nets = append(nets, curr)
+				supernets = append(supernets, curr)
 				curr = []byte{}
 				continue
 			}
@@ -40,12 +87,14 @@ func createIps(data []byte) []Ip {
 			curr = append(curr, char)
 		}
 		if len(curr) > 0 {
-			nets = append(nets, curr)
+			supernets = append(supernets, curr)
 		}
 
 		ips = append(ips, Ip{
-			Nets:      nets,
+			Supernets: supernets,
 			Hypernets: hypernets,
+			SuperAba:  make(map[string]bool),
+			HyperAba:  make(map[string]bool),
 		})
 
 	}
@@ -70,13 +119,28 @@ func containsAbba(net []byte) bool {
 func solvePartOne(ips []Ip) int {
 	var count int
 	for _, ip := range ips {
-		if slices.ContainsFunc(ip.Nets, containsAbba) && !slices.ContainsFunc(ip.Hypernets, containsAbba) {
+		if slices.ContainsFunc(ip.Supernets, containsAbba) && !slices.ContainsFunc(ip.Hypernets, containsAbba) {
 			count++
 		}
 
 	}
 
 	return count
+}
+
+func solvePartTwo(ips []Ip) int {
+	var count int
+	for _, ip := range ips {
+		ip.GetSuperAba()
+		ip.GetHyperAba()
+
+		if ip.SupportsSsl() {
+			count++
+		}
+	}
+
+	return count
+
 }
 
 func main() {
@@ -91,5 +155,8 @@ func main() {
 
 	res := solvePartOne(ips)
 	fmt.Println(res)
+
+	res2 := solvePartTwo(ips)
+	fmt.Println(res2)
 
 }
