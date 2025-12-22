@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/kevin-kho/aoc-utilities/common"
 )
@@ -19,6 +20,17 @@ func createKeypadGrid() [][]int {
 	res = append(res, []int{4, 5, 6})
 	res = append(res, []int{7, 8, 9})
 	return res
+}
+
+func createSpecialGrid() [][]string {
+	var grid [][]string
+	grid = append(grid, []string{"X", "X", "1", "X", "X"})
+	grid = append(grid, []string{"X", "2", "3", "4", "X"})
+	grid = append(grid, []string{"5", "6", "7", "8", "9"})
+	grid = append(grid, []string{"X", "A", "B", "C", "X"})
+	grid = append(grid, []string{"X", "X", "D", "X", "X"})
+
+	return grid
 }
 
 func createDirs(data []byte) [][]Dir {
@@ -83,6 +95,42 @@ func solvePartOne(dirs [][]Dir) int {
 
 }
 
+func solvePartTwo(dirs [][]Dir) string {
+	var numbers []string
+	grid := createSpecialGrid()
+	X := len(grid[0])
+	Y := len(grid)
+	curr := Dir{
+		X: 0,
+		Y: 2,
+	}
+
+	for _, dir := range dirs {
+		for _, d := range dir {
+			newX := curr.X + d.X
+			newY := curr.Y + d.Y
+
+			// case: out of bounds
+			if !(0 <= newX && newX < X) || !(0 <= newY && newY < Y) {
+				continue
+			}
+
+			// case: we hit an "X"
+			if grid[newY][newX] == "X" {
+				continue
+			}
+
+			curr.X = newX
+			curr.Y = newY
+		}
+
+		numbers = append(numbers, grid[curr.Y][curr.X])
+	}
+
+	return strings.Join(numbers, "")
+
+}
+
 func main() {
 	filePath := "./inputExample.txt"
 	filePath = "./input.txt"
@@ -95,5 +143,8 @@ func main() {
 	dirs := createDirs(data)
 	res := solvePartOne(dirs)
 	fmt.Println(res)
+
+	res2 := solvePartTwo(dirs)
+	fmt.Println(res2)
 
 }
