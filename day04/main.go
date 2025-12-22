@@ -60,6 +60,25 @@ func (r Room) IsValidRoom() bool {
 
 }
 
+func (r Room) DecipherName() string {
+	shift := r.SectorId % 26
+	var decipheredName []rune
+	for _, char := range r.EncryptedName {
+		if char == 45 {
+			decipheredName = append(decipheredName, char)
+			continue
+		}
+		newChar := char + rune(shift)
+		if newChar > 122 {
+			newChar = 97 + (newChar % 123)
+		}
+		decipheredName = append(decipheredName, newChar)
+	}
+
+	return string(decipheredName)
+
+}
+
 func createRooms(data []byte) ([]Room, error) {
 	var rooms []Room
 	for row := range bytes.SplitSeq(data, []byte{10}) {
@@ -100,6 +119,15 @@ func solvePartOne(rooms []Room) int {
 
 }
 
+func solvePartTwo(rooms []Room) {
+	for _, rm := range rooms {
+		if rm.IsValidRoom() {
+			decipheredName := rm.DecipherName()
+			fmt.Println(decipheredName, rm.SectorId)
+		}
+	}
+}
+
 func main() {
 
 	filePath := "./input.txt"
@@ -116,5 +144,7 @@ func main() {
 
 	res := solvePartOne(rooms)
 	fmt.Println(res)
+
+	solvePartTwo(rooms)
 
 }
