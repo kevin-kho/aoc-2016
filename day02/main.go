@@ -13,7 +13,7 @@ type Dir struct {
 	Y int
 }
 
-func createGrid() [][]int {
+func createKeypadGrid() [][]int {
 	var res [][]int
 	res = append(res, []int{1, 2, 3})
 	res = append(res, []int{4, 5, 6})
@@ -51,7 +51,7 @@ func createDirs(data []byte) [][]Dir {
 
 func solvePartOne(dirs [][]Dir) int {
 	var numbers []int
-	grid := createGrid()
+	grid := createKeypadGrid()
 	X := len(grid[0])
 	Y := len(grid)
 	curr := Dir{
