@@ -34,6 +34,7 @@ type Pos struct {
 	X    int
 	Y    int
 	Card Cardinal
+	Seen map[[2]int]bool
 }
 
 func (p *Pos) Turn(cmd Command) {
@@ -88,43 +89,55 @@ func (p *Pos) Move(cmd Command) {
 
 }
 
-func (p *Pos) Track(cmd Command, seen map[[2]int]bool) bool {
+func (p Pos) HaveVisited() bool {
+	return p.Seen[[2]int{p.X, p.Y}]
+}
+
+func (p *Pos) Visit() {
+	p.Seen[[2]int{p.X, p.Y}] = true
+}
+
+func (p *Pos) Track(cmd Command) bool {
 	p.Turn(cmd)
 
 	switch p.Card {
 	case North:
 		for range cmd.Number {
 			p.Y += 1
-			if seen[[2]int{p.X, p.Y}] {
+			if p.HaveVisited() {
 				return true
 			}
-			seen[[2]int{p.X, p.Y}] = true
+			p.Visit()
+
 		}
 	case East:
 		for range cmd.Number {
 			p.X -= 1
-			if seen[[2]int{p.X, p.Y}] {
+
+			if p.HaveVisited() {
 				return true
 			}
-			seen[[2]int{p.X, p.Y}] = true
+			p.Visit()
+
 		}
 	case South:
 		for range cmd.Number {
 			p.Y -= 1
-			if seen[[2]int{p.X, p.Y}] {
+
+			if p.HaveVisited() {
 				return true
 			}
-			seen[[2]int{p.X, p.Y}] = true
+			p.Visit()
 
 		}
 	case West:
 		for range cmd.Number {
 			p.X += 1
 
-			if seen[[2]int{p.X, p.Y}] {
+			if p.HaveVisited() {
 				return true
 			}
-			seen[[2]int{p.X, p.Y}] = true
+			p.Visit()
 
 		}
 	}
@@ -179,17 +192,16 @@ func solvePartOne(cmds []Command) int {
 }
 
 func solvePartTwo(cmds []Command) int {
-	var pos Pos
+	pos := Pos{
+		Seen: map[[2]int]bool{[2]int{0, 0}: true},
+	}
 	seen := make(map[[2]int]bool)
 	seen[[2]int{0, 0}] = true
 	for _, cmd := range cmds {
-
-		if pos.Track(cmd, seen) {
+		if pos.Track(cmd) {
 			return pos.GetDistance()
 		}
-
 	}
-
 	return pos.GetDistance()
 
 }
