@@ -36,7 +36,7 @@ type Pos struct {
 	Card Cardinal
 }
 
-func (p *Pos) Move(cmd Command) {
+func (p *Pos) Turn(cmd Command) {
 	switch p.Card {
 	case North:
 		if cmd.Turn == Left {
@@ -63,6 +63,12 @@ func (p *Pos) Move(cmd Command) {
 			p.Card = North
 		}
 	}
+
+}
+
+func (p *Pos) Move(cmd Command) {
+
+	p.Turn(cmd)
 
 	var dx int
 	var dy int
@@ -79,6 +85,51 @@ func (p *Pos) Move(cmd Command) {
 
 	p.X += dx
 	p.Y += dy
+
+}
+
+func (p *Pos) Track(cmd Command, seen map[[2]int]bool) bool {
+	p.Turn(cmd)
+
+	switch p.Card {
+	case North:
+		for range cmd.Number {
+			p.Y += 1
+			if seen[[2]int{p.X, p.Y}] {
+				return true
+			}
+			seen[[2]int{p.X, p.Y}] = true
+		}
+	case East:
+		for range cmd.Number {
+			p.X -= 1
+			if seen[[2]int{p.X, p.Y}] {
+				return true
+			}
+			seen[[2]int{p.X, p.Y}] = true
+		}
+	case South:
+		for range cmd.Number {
+			p.Y -= 1
+			if seen[[2]int{p.X, p.Y}] {
+				return true
+			}
+			seen[[2]int{p.X, p.Y}] = true
+
+		}
+	case West:
+		for range cmd.Number {
+			p.X += 1
+
+			if seen[[2]int{p.X, p.Y}] {
+				return true
+			}
+			seen[[2]int{p.X, p.Y}] = true
+
+		}
+	}
+
+	return false
 
 }
 
@@ -127,6 +178,22 @@ func solvePartOne(cmds []Command) int {
 
 }
 
+func solvePartTwo(cmds []Command) int {
+	var pos Pos
+	seen := make(map[[2]int]bool)
+	seen[[2]int{0, 0}] = true
+	for _, cmd := range cmds {
+
+		if pos.Track(cmd, seen) {
+			return pos.GetDistance()
+		}
+
+	}
+
+	return pos.GetDistance()
+
+}
+
 func main() {
 	filePath := "./inputExample.txt"
 	filePath = "./input.txt"
@@ -144,5 +211,8 @@ func main() {
 
 	res := solvePartOne(cmds)
 	fmt.Println(res)
+
+	res2 := solvePartTwo(cmds)
+	fmt.Println(res2)
 
 }
