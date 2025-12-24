@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -97,8 +98,7 @@ func GetBotInstructions(data []byte) (map[int][][2]Destination, error) {
 	return instructions, nil
 }
 
-func solvePartOne(inventory map[int][]int, instructions map[int][][2]Destination) {
-
+func executeInstructions(inventory map[int][]int, instructions map[int][][2]Destination) map[int][]int {
 	output := make(map[int][]int)
 
 	var queue []int
@@ -159,6 +159,24 @@ func solvePartOne(inventory map[int][]int, instructions map[int][][2]Destination
 		}
 
 	}
+	return output
+}
+
+func solvePartOne(inventory map[int][]int, instructions map[int][][2]Destination) {
+	executeInstructions(inventory, instructions)
+
+}
+
+func solvePartTwo(inventory map[int][]int, instructions map[int][][2]Destination) int {
+	output := executeInstructions(inventory, instructions)
+	res := 1
+	for i := range 3 {
+		for _, v := range output[i] {
+			res *= v
+			break
+		}
+	}
+	return res
 
 }
 
@@ -181,6 +199,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	inventory2 := maps.Clone(inventory)
+
 	solvePartOne(inventory, instructions)
+
+	res2 := solvePartTwo(inventory2, instructions)
+	fmt.Println(res2)
 
 }
