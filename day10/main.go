@@ -2,32 +2,14 @@ package main
 
 import (
 	"bytes"
-	"container/heap"
 	"fmt"
 	"log"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/kevin-kho/aoc-utilities/common"
 )
-
-type IntHeap []int
-
-func (h IntHeap) Len() int           { return len(h) }
-func (h IntHeap) Less(i, j int) bool { return h[i] < h[j] }
-func (h IntHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
-
-func (h *IntHeap) Push(x any) {
-	*h = append(*h, x.(int))
-}
-
-func (h *IntHeap) Pop() any {
-	old := *h
-	n := len(old)
-	x := old[n-1]
-	*h = old[0 : n-1]
-	return x
-}
 
 type Destination struct {
 	Kind Type
@@ -41,8 +23,8 @@ const (
 	Output
 )
 
-func PopulateBotInventory(data []byte) (map[int]*IntHeap, error) {
-	inventory := map[int]*IntHeap{}
+func PopulateBotInventory(data []byte) (map[int][]int, error) {
+	inventory := map[int][]int{}
 	for entry := range bytes.SplitSeq(data, []byte{10}) {
 		if !strings.HasPrefix(string(entry), "value") {
 			continue
@@ -58,12 +40,8 @@ func PopulateBotInventory(data []byte) (map[int]*IntHeap, error) {
 		if err != nil {
 			return inventory, err
 		}
-		if inventory[bot] == nil {
-			inventory[bot] = &IntHeap{}
-			heap.Init(inventory[bot])
-		}
 
-		heap.Push(inventory[bot], value)
+		inventory[bot] = append(inventory[bot], value)
 
 	}
 
@@ -119,20 +97,13 @@ func GetBotInstructions(data []byte) (map[int][][2]Destination, error) {
 	return instructions, nil
 }
 
-func HeapifyInventories(inv map[int]*IntHeap) {
-	for _, h := range inv {
-		heap.Init(h)
-	}
-
-}
-
-func solvePartOne(inventory map[int]*IntHeap, instructions map[int][][2]Destination) {
+func solvePartOne(inventory map[int][]int, instructions map[int][][2]Destination) {
 
 	output := make(map[int][]int)
 
 	var queue []int
 	for bot, inv := range inventory {
-		if inv.Len() > 1 {
+		if len(inv) > 1 {
 			queue = append(queue, bot)
 		}
 	}
@@ -145,13 +116,25 @@ func solvePartOne(inventory map[int]*IntHeap, instructions map[int][][2]Destinat
 
 			for _, instruct := range instructions[bot] {
 				botInventory := inventory[bot]
+				if slices.Contains(botInventory, 17) && slices.Contains(botInventory, 61) {
+					fmt.Println(bot)
+				}
 
-				low := heap.Pop(botInventory).(int)
+				var low int
+				var high int
+				if botInventory[0] > botInventory[1] {
+					high = botInventory[0]
+					low = botInventory[1]
+				} else {
+					high = botInventory[1]
+					low = botInventory[0]
+				}
+
 				lowTargetKind := instruct[0].Kind
 				lowTargetNum := instruct[0].Num
 				if lowTargetKind == Bot {
-					heap.Push(inventory[lowTargetNum], low)
-					if inventory[lowTargetNum].Len() > 1 {
+					inventory[lowTargetNum] = append(inventory[lowTargetNum], low)
+					if len(inventory[lowTargetNum]) > 1 {
 						queue = append(queue, lowTargetNum)
 					}
 				} else {
@@ -159,13 +142,11 @@ func solvePartOne(inventory map[int]*IntHeap, instructions map[int][][2]Destinat
 
 				}
 
-				high := heap.Pop(botInventory).(int)
-				fmt.Println(bot, low, high)
 				highTargetKind := instruct[1].Kind
 				highTargetNum := instruct[1].Num
 				if highTargetKind == Bot {
-					heap.Push(inventory[highTargetNum], high)
-					if inventory[highTargetNum].Len() > 1 {
+					inventory[highTargetNum] = append(inventory[highTargetNum], high)
+					if len(inventory[highTargetNum]) > 1 {
 						queue = append(queue, highTargetNum)
 					}
 
@@ -178,9 +159,6 @@ func solvePartOne(inventory map[int]*IntHeap, instructions map[int][][2]Destinat
 		}
 
 	}
-
-	// fmt.Println(inventory)
-	// fmt.Println(output)
 
 }
 
@@ -197,8 +175,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	HeapifyInventories(inventory)
 
 	instructions, err := GetBotInstructions(data)
 	if err != nil {
