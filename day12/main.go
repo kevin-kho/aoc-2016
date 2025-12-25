@@ -55,11 +55,10 @@ func CreateInstructions(data []byte) ([]Instruction, error) {
 			action = JNZ
 			target = entryStr[1]
 			value, err = strconv.Atoi(entryStr[len(entryStr)-1])
+			if err != nil {
+				return instructions, err
+			}
 		}
-
-		// if err != nil {
-		// 	return instructions, err
-		// }
 
 		instruct := Instruction{
 			Action: action,
