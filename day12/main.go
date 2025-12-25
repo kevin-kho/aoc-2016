@@ -109,6 +109,41 @@ func solvePartOne(instructions []Instruction) {
 
 }
 
+func solvePartTwo(instructions []Instruction) {
+	register := make(map[string]int)
+	register["1"] = 1 // TODO: fix
+	register["c"] = 1
+
+	// Use pointer and while loop
+	var i int
+	for i < len(instructions) {
+		cmd := instructions[i]
+		switch cmd.Action {
+		case CPY:
+			if cmd.Source != "" {
+				register[cmd.Target] = register[cmd.Source]
+			} else {
+				register[cmd.Target] = cmd.Value
+			}
+		case INC:
+			register[cmd.Target]++
+		case DEC:
+			register[cmd.Target]--
+		case JNZ:
+			if register[cmd.Target] == 0 {
+				break
+			}
+			i += cmd.Value
+			continue
+
+		}
+
+		i++
+
+	}
+	fmt.Println(register)
+}
+
 func main() {
 	filePath := "./inputExample.txt"
 	filePath = "./input.txt"
@@ -125,5 +160,6 @@ func main() {
 	}
 
 	solvePartOne(instructions)
+	solvePartTwo(instructions)
 
 }
