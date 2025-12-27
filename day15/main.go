@@ -82,7 +82,8 @@ func SolvePartOne(discs []Disc) int {
 
 func main() {
 	filePath := "./inputExample.txt"
-	filePath = "./input.txt"
+	filePath = "./inputPartOne.txt"
+	filePath = "./inputPartTwo.txt"
 	data, err := common.ReadInput(filePath)
 	if err != nil {
 		log.Fatal(err)
