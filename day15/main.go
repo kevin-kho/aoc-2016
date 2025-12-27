@@ -56,8 +56,33 @@ func GetDiscs(data []byte) ([]Disc, error) {
 	return discs, nil
 }
 
+func GetDiscPositions(discs []Disc, sec int) map[int]bool {
+	positions := make(map[int]bool)
+	for _, disc := range discs {
+		positions[disc.CalcFinalPos(sec)] = true
+	}
+
+	return positions
+}
+
+func SolvePartOne(discs []Disc) int {
+	var res int
+
+	var sec int
+	for true {
+		if len(GetDiscPositions(discs, sec)) == 1 {
+			res = sec
+			break
+		}
+		sec++
+	}
+
+	return res
+}
+
 func main() {
 	filePath := "./inputExample.txt"
+	filePath = "./input.txt"
 	data, err := common.ReadInput(filePath)
 	if err != nil {
 		log.Fatal(err)
@@ -68,6 +93,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(discs)
+
+	res := SolvePartOne(discs)
+	fmt.Println(res)
 
 }
