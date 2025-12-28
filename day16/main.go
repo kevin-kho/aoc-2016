@@ -65,6 +65,7 @@ func main() {
 
 	input := "11110010111001001"
 	length := 272
+	length = 35651584
 
 	res := SolvePartOne(input, length)
 	fmt.Println(res)
