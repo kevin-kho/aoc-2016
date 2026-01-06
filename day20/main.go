@@ -83,6 +83,15 @@ func solvePartOne(intervals []Interval) int {
 	return -1
 }
 
+func solvePartTwo(intervals []Interval) int {
+	var count int
+	for i := 1; i < len(intervals); i++ {
+		count += intervals[i].Start - intervals[i-1].End - 1
+	}
+
+	return count
+}
+
 func main() {
 	filePath := "./inputExample.txt"
 	filePath = "./input.txt"
@@ -99,5 +108,8 @@ func main() {
 	mergedIntervals := MergeIntervals(intervals)
 	res := solvePartOne(mergedIntervals)
 	fmt.Println(res)
+
+	res2 := solvePartTwo(mergedIntervals)
+	fmt.Println(res2)
 
 }
