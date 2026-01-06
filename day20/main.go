@@ -53,7 +53,7 @@ func GetSortedIntervals(intervals []Interval) []Interval {
 	return intervals
 }
 
-func MergeIntervals(intervals []Interval) []Interval {
+func MergeOverlappingIntervals(intervals []Interval) []Interval {
 	var res []Interval
 	sorted := GetSortedIntervals(intervals)
 	curr := sorted[0]
@@ -70,6 +70,25 @@ func MergeIntervals(intervals []Interval) []Interval {
 	res = append(res, curr)
 
 	return res
+}
+
+func MergeContiguousIntervals(intervals []Interval) []Interval {
+	var res []Interval
+	curr := intervals[0]
+	for i := 1; i < len(intervals); i++ {
+		inter := intervals[i]
+		if curr.End+1 == inter.Start {
+			curr.End = inter.End
+			continue
+		}
+		res = append(res, curr)
+		curr = inter
+
+	}
+	res = append(res, curr)
+
+	return res
+
 }
 
 func solvePartOne(intervals []Interval) int {
@@ -105,7 +124,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	mergedIntervals := MergeIntervals(intervals)
+	mergedIntervals := MergeOverlappingIntervals(intervals)
 	res := solvePartOne(mergedIntervals)
 	fmt.Println(res)
 
