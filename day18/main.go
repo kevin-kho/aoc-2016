@@ -94,4 +94,7 @@ func main() {
 
 	res := SolvePartOne(data, 40)
 	fmt.Println(res)
+
+	res2 := SolvePartOne(data, 400000)
+	fmt.Println(res2)
 }
