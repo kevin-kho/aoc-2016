@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"slices"
 	"strconv"
@@ -105,9 +106,12 @@ func SolvePartOne(pwd Password, data []byte) {
 	// TODO: handle error
 
 	for cmd := range bytes.SplitSeq(data, []byte{'\n'}) {
+
+		fmt.Print(string(pwd.Word), " ")
 		cmdStrArr := strings.Split(string(cmd), " ")
 
 		cmdType := strings.Join(cmdStrArr[:2], " ")
+		fmt.Print(cmdStrArr, " ")
 		switch cmdType {
 		case "swap position":
 			x, _ := strconv.Atoi(cmdStrArr[2])
@@ -135,6 +139,8 @@ func SolvePartOne(pwd Password, data []byte) {
 			ltr := []byte(cmdStrArr[len(cmdStrArr)-1])[0]
 			pwd.RotateByLtr(ltr)
 		}
+
+		fmt.Print(string(pwd.Word), "\n")
 
 	}
 
