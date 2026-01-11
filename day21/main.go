@@ -1,9 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"bytes"
 	"log"
 	"slices"
+	"strconv"
+	"strings"
 
 	"github.com/kevin-kho/aoc-utilities/common"
 )
@@ -62,13 +64,17 @@ func (p *Password) RotateByLtr(x byte) {
 	p.RotateRight(n)
 }
 
-func (p *Password) MovePos(x, y int) {
-	char := p.Word[x]
-	p.Word = slices.Insert(p.Word, y, char)
+func (p *Password) MovePos(src, dst int) {
+	char := p.Word[src]
+	if dst == len(p.Word)-1 {
+		p.Word = append(p.Word, char)
+	} else {
+		p.Word = slices.Insert(p.Word, dst, char)
+	}
 
-	remove := y
-	if x < y {
-		// Remove last occurance
+	remove := dst
+	if src < dst {
+		// Remove first occurance
 		for i := 0; i < len(p.Word); i++ {
 			if p.Word[i] == char {
 				remove = i
@@ -76,7 +82,7 @@ func (p *Password) MovePos(x, y int) {
 			}
 		}
 	} else {
-		// Remove first occurance
+		// Remove last occurance
 		for i := len(p.Word) - 1; i >= 0; i-- {
 			if p.Word[i] == char {
 				remove = i
@@ -95,17 +101,57 @@ func ConstructPassword(data []byte) Password {
 	}
 }
 
+func SolvePartOne(pwd Password, data []byte) {
+	// TODO: handle error
+
+	for cmd := range bytes.SplitSeq(data, []byte{'\n'}) {
+		cmdStrArr := strings.Split(string(cmd), " ")
+
+		cmdType := strings.Join(cmdStrArr[:2], " ")
+		switch cmdType {
+		case "swap position":
+			x, _ := strconv.Atoi(cmdStrArr[2])
+			y, _ := strconv.Atoi(cmdStrArr[len(cmdStrArr)-1])
+			pwd.SwapPos(x, y)
+		case "swap letter":
+			x := []byte(cmdStrArr[2])[0]
+			y := []byte(cmdStrArr[len(cmdStrArr)-1])[0]
+			pwd.SwapLtr(x, y)
+		case "reverse positions":
+			x, _ := strconv.Atoi(cmdStrArr[2])
+			y, _ := strconv.Atoi(cmdStrArr[len(cmdStrArr)-1])
+			pwd.ReversePos(x, y)
+		case "rotate left":
+			x, _ := strconv.Atoi(cmdStrArr[2])
+			pwd.RotateLeft(x)
+		case "rotate right":
+			x, _ := strconv.Atoi(cmdStrArr[2])
+			pwd.RotateRight(x)
+		case "move position":
+			x, _ := strconv.Atoi(cmdStrArr[2])
+			y, _ := strconv.Atoi(cmdStrArr[len(cmdStrArr)-1])
+			pwd.MovePos(x, y)
+		case "rotate based":
+			ltr := []byte(cmdStrArr[len(cmdStrArr)-1])[0]
+			pwd.RotateByLtr(ltr)
+		}
+
+	}
+
+}
+
 func main() {
 	filePath := "./inputExample.txt"
+	filePath = "./input.txt"
 	data, err := common.ReadInput(filePath)
 	if err != nil {
 		log.Fatal(err)
 	}
 	data = common.TrimNewLineSuffix(data)
 
-	pwd := ConstructPassword(data)
+	pwd := ConstructPassword([]byte("abcde"))
+	pwd = ConstructPassword([]byte("abcdefgh"))
 
-	pwd.MovePos(1, 0)
-	fmt.Println(string(pwd.Word))
+	SolvePartOne(pwd, data)
 
 }
