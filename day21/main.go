@@ -67,8 +67,9 @@ func (p *Password) RotateByLtr(x byte) {
 
 func (p *Password) MovePos(src, dst int) {
 	char := p.Word[src]
-	if dst == len(p.Word)-1 {
-		p.Word = append(p.Word, char)
+
+	if src < dst {
+		p.Word = slices.Insert(p.Word, dst+1, char)
 	} else {
 		p.Word = slices.Insert(p.Word, dst, char)
 	}
@@ -107,11 +108,9 @@ func SolvePartOne(pwd Password, data []byte) {
 
 	for cmd := range bytes.SplitSeq(data, []byte{'\n'}) {
 
-		fmt.Print(string(pwd.Word), " ")
 		cmdStrArr := strings.Split(string(cmd), " ")
-
 		cmdType := strings.Join(cmdStrArr[:2], " ")
-		fmt.Print(cmdStrArr, " ")
+
 		switch cmdType {
 		case "swap position":
 			x, _ := strconv.Atoi(cmdStrArr[2])
@@ -140,9 +139,9 @@ func SolvePartOne(pwd Password, data []byte) {
 			pwd.RotateByLtr(ltr)
 		}
 
-		fmt.Print(string(pwd.Word), "\n")
-
 	}
+
+	fmt.Println(string(pwd.Word))
 
 }
 
