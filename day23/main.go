@@ -18,6 +18,28 @@ type Instruction struct {
 	Offset  int
 }
 
+func GetToggledInstruction(in Instruction) Instruction {
+	var cmd string
+	switch in.Command {
+	case "cpyReg":
+		cmd = "jnzReg"
+	case "cpyVal":
+		cmd = "jnzVal"
+	case "jnzVal":
+		cmd = "cpyVal"
+	case "jnzReg":
+		cmd = "cpyReg"
+	case "inc":
+		cmd = "dec"
+	case "dec":
+		cmd = "inc"
+	}
+
+	in.Command = cmd
+
+	return in
+}
+
 func CreateInstructions(data []byte) ([]Instruction, error) {
 	var res []Instruction
 	for entry := range bytes.SplitSeq(data, []byte{'\n'}) {
